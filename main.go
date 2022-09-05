@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Essential/common"
+	"STU/common"
 	"os"
 
 	"github.com/gin-gonic/gin"

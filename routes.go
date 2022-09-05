@@ -1,41 +1,31 @@
 package main
 
 import (
-	"Essential/controller"
-	"Essential/middleware"
+	"STU/controller"
+	"STU/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CollectRoute(r *gin.Engine) *gin.Engine {
 	r.Use(middleware.CORSMiddleware(), middleware.RecoveryMiddleware())
-	r.POST("/regist", controller.Register)
-	r.POST("/login", controller.Login)
 
-	r.GET("/personal", middleware.AuthMiddleware(), controller.PersonalPage)
-	r.PUT("/personal", middleware.AuthMiddleware(), controller.PersonalUpdate)
-	r.POST("/personal", middleware.AuthMiddleware(), controller.PersonalIcon)
-	r.GET("/personal/:id", middleware.AuthMiddleware(), controller.PersonalShow)
+	r.POST("/add/edge", controller.AddEdgeController)
+	r.POST("/add/point", controller.AddPointController)
 
-	articleRoutes := r.Group("/article")
-	articleRoutes.Use(middleware.AuthMiddleware())
-	articleController := controller.NewArticleController()
-	articleRoutes.POST("", articleController.Create)
-	articleRoutes.PUT("/:id", articleController.Update) //替换
-	articleRoutes.GET("/:id", articleController.Show)
-	articleRoutes.DELETE("/:id", articleController.Delete)
-	articleRoutes.POST("/pagelist", articleController.PageList)
+	r.DELETE("/delete/edge/:id", controller.DeleteEdgeController)
+	r.DELETE("/delete/point/:id", controller.DeletePointController)
 
-	postRoutes := r.Group("/post")
-	postRoutes.Use(middleware.AuthMiddleware())
-	postController := controller.NewPostController()
-	postRoutes.POST("", postController.Create)
-	postRoutes.PUT("/:id", postController.Update) //替换
-	postRoutes.GET("/:id", postController.Show)
-	postRoutes.DELETE("/:id", postController.Delete)
-	postRoutes.POST("/pagelist", postController.PageList)
+	r.GET("/show/edges", controller.ShowEdgesController)
+	r.GET("/show/points", controller.ShowPointsController)
 
-	postRoutes.POST("/:id", postController.ThreadCreate)
+	r.GET("/show/edge/:id", controller.ShowEdgeController)
+	r.GET("/show/point/:id", controller.ShowPointController)
+
+	r.POST("/change/edge/:id", controller.ChangeEdgeController)
+	r.POST("/change/point/:id", controller.ChangePointController)
+
+	r.POST("/path", controller.PathController)
 
 	return r
 }

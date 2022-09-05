@@ -1,7 +1,7 @@
 package common
 
 import (
-	"Essential/model"
+	"STU/vo"
 	"fmt"
 	"net/url"
 
@@ -33,7 +33,8 @@ func InitDB() *gorm.DB {
 	if err != nil {
 		panic("failed to connect database, err:" + err.Error())
 	}
-	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&vo.Point{})
+	db.AutoMigrate(&vo.Edge{})
 	DB = db
 	return db
 }

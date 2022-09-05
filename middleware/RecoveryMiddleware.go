@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"Essential/response"
+	"STU/response"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
