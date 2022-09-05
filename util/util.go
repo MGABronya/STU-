@@ -4,7 +4,6 @@ import (
 	"STU/common"
 	"STU/vo"
 	"container/heap"
-	"fmt"
 )
 
 type p struct {
@@ -46,15 +45,9 @@ var edge []node
 var cnt int
 var head []int  //由点进入，内存了该点的所有边
 var d []float64 //记录距离
-var dpPoint []int
-var dpEdge []int
 
 var EdgeTotal int
 var PointTotal int
-
-var resPoint [][][]int
-var resEdge [][][]int
-var resLength [][]float64
 
 func add_edge(a int, b int, id int, c float64) {
 	edge[cnt] = node{b, head[a], id, c}
@@ -75,17 +68,6 @@ func InitPath() {
 	edge = make([]node, EdgeTotal*2, EdgeTotal*2)
 	head = make([]int, PointTotal, PointTotal)
 	d = make([]float64, PointTotal, PointTotal)
-	dpPoint = make([]int, PointTotal, PointTotal)
-	dpEdge = make([]int, PointTotal, PointTotal)
-	resPoint = make([][][]int, PointTotal, PointTotal)
-	resEdge = make([][][]int, PointTotal, PointTotal)
-	resLength = make([][]float64, PointTotal, PointTotal)
-
-	for i := 0; i < PointTotal; i++ {
-		resPoint[i] = make([][]int, PointTotal, PointTotal)
-		resEdge[i] = make([][]int, PointTotal, PointTotal)
-		resLength[i] = make([]float64, PointTotal, PointTotal)
-	}
 
 	cnt = 0
 
@@ -94,29 +76,25 @@ func InitPath() {
 	}
 
 	for i := range edges {
-		add_edge(edges[i].PointA, edges[i].PointB, int(edges[i].ID), edges[i].Length)
-		add_edge(edges[i].PointB, edges[i].PointA, int(edges[i].ID), edges[i].Length)
-	}
-	for i := 0; i < PointTotal; i++ {
-		for j := 0; j < PointTotal; j++ {
-			resLength[i][j] = dijkstra(i + 1, j + 1)
-		}
+		add_edge(edges[i].PointA-1, edges[i].PointB-1, int(edges[i].ID), edges[i].Length)
+		add_edge(edges[i].PointB-1, edges[i].PointA-1, int(edges[i].ID), edges[i].Length)
 	}
 }
 
-func dijkstra(start int, end int) float64 {
+func dijkstra(start int, end int) (float64, *[]int, *[]int) {
 	que := &P{}
 	heap.Init(que)
+	dpPoint := make([]int, PointTotal, PointTotal)
+	dpEdge := make([]int, PointTotal, PointTotal)
 	for i := 0; i < PointTotal; i++ {
 		d[i] = 2020611073
 		dpPoint[i] = -1
 		dpEdge[i] = -1
 	}
-	d[start] = 0
-	heap.Push(que, p{start, 0})
+	d[start-1] = 0
+	heap.Push(que, p{start - 1, 0})
 	for que.Len() != 0 {
 		pp := heap.Pop(que).(p)
-		fmt.Print(pp)
 		if d[pp.point] < pp.len {
 			continue
 		}
@@ -129,15 +107,18 @@ func dijkstra(start int, end int) float64 {
 			}
 		}
 	}
-
-	for i := end; i != -1; i = dpPoint[i] {
-		resPoint[end][start] = append(resPoint[end][start], i)
+	var Points, Edges []int
+	for i, j := dpPoint[end-1], dpEdge[end-1]; i != -1; i, j = dpPoint[i], dpEdge[i] {
+		Points = append(Points, i+1)
+		Edges = append(Edges, j)
 	}
-
-	for i := dpEdge[end]; i != -1; i = dpEdge[i] {
-		resEdge[end][start] = append(resEdge[end][start], i)
+	for i, j := 0, len(Points)-1; i < j; i, j = i+1, j-1 {
+		Points[i], Points[j] = Points[j], Points[i]
 	}
-	return d[end]
+	for i, j := 0, len(Edges)-1; i < j; i, j = i+1, j-1 {
+		Edges[i], Edges[j] = Edges[j], Edges[i]
+	}
+	return d[end-1], &Points, &Edges
 }
 
 func permute(nums []int) [][]int {
@@ -167,18 +148,23 @@ func permute(nums []int) [][]int {
 	return res
 }
 
-func DFS(ResPoint *[]int, ResEdge *[]int, path *vo.Path) float64 {
-	*ResPoint = make([]int, len(path.End), len(path.End))
-	(*ResPoint)[0] = path.Start
-	PossiblePaths := permute(path.End)
-	var res float64 = 2020611073
+func DFS(path *vo.Path) (float64, *[]int, *[]int) {
+	if len(path.Location) == 0 {
+		res, ResPoint, ResEdge := dijkstra(path.Start, path.End)
+		*ResPoint = append(*ResPoint, path.End)
+		return res, ResPoint, ResEdge
+	}
+	res, ResPoint, ResEdge := 2020611073.0, &[]int{}, &[]int{}
+	PossiblePaths := permute(path.Location)
 	for i := range PossiblePaths {
-		tmp := resLength[path.Start][PossiblePaths[i][0]]
+		Tmp, TmpPoint, TmpEdge := dijkstra(path.Start, PossiblePaths[i][0])
 		for j := 1; j < len(PossiblePaths[i]); j++ {
-			tmp += resLength[PossiblePaths[i][j-1]][PossiblePaths[i][j]]
+			tmp, tmpPoint, tmpEdge := dijkstra(PossiblePaths[i][j-1], PossiblePaths[i][j])
+			Tmp += tmp
+			TmpPoint
 		}
-		if tmp < res {
-			res = tmp
+		if Tmp < res {
+			res = Tmp
 			for j := 0; j < len(PossiblePaths[i]); j++ {
 				(*ResPoint)[j+1] = PossiblePaths[i][j]
 			}
@@ -193,5 +179,5 @@ func DFS(ResPoint *[]int, ResEdge *[]int, path *vo.Path) float64 {
 			}
 		}
 	}
-	return res
+	return res, ResPoint, ResEdge
 }

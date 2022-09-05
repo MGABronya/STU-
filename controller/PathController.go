@@ -24,10 +24,7 @@ func PathController(ctx *gin.Context) {
 		return
 	}
 
-	ResPoint := []int{}
-	ResEdge := []int{}
-
-	length := util.DFS(&ResPoint, &ResEdge, &path)
+	length, ResPoint, ResEdge := util.DFS(&path)
 
 	// 成功
 	response.Success(ctx, gin.H{"Points": ResPoint, "Edges": ResEdge, "length": length}, "成功")
