@@ -161,23 +161,17 @@ func DFS(path *vo.Path) (float64, *[]int, *[]int) {
 		for j := 1; j < len(PossiblePaths[i]); j++ {
 			tmp, tmpPoint, tmpEdge := dijkstra(PossiblePaths[i][j-1], PossiblePaths[i][j])
 			Tmp += tmp
-			TmpPoint
+			*TmpPoint = append(*TmpPoint, (*tmpPoint)[:]...)
+			*TmpEdge = append(*TmpEdge, (*tmpEdge)[:]...)
 		}
+		tmp, tmpPoint, tmpEdge := dijkstra(PossiblePaths[i][len(PossiblePaths[i])-1], path.End)
+		Tmp += tmp
+		*TmpPoint = append(*TmpPoint, (*tmpPoint)[:]...)
+		*TmpEdge = append(*TmpEdge, (*tmpEdge)[:]...)
 		if Tmp < res {
-			res = Tmp
-			for j := 0; j < len(PossiblePaths[i]); j++ {
-				(*ResPoint)[j+1] = PossiblePaths[i][j]
-			}
-			(*ResEdge) = make([]int, 0)
-			for _, v := range resEdge[path.Start][PossiblePaths[i][0]] {
-				(*ResEdge) = append(*ResEdge, v)
-			}
-			for j := 1; j < len(PossiblePaths[i]); j++ {
-				for _, v := range resEdge[PossiblePaths[i][j-1]][PossiblePaths[i][j]] {
-					(*ResEdge) = append(*ResEdge, v)
-				}
-			}
+			res, ResPoint, ResEdge = Tmp, TmpPoint, TmpEdge
 		}
 	}
+	*ResPoint = append(*ResPoint, path.End)
 	return res, ResPoint, ResEdge
 }

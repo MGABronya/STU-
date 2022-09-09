@@ -24,6 +24,10 @@ func PathController(ctx *gin.Context) {
 		return
 	}
 
+	if len(path.Location) > 6 {
+		response.Fail(ctx, nil, "必经点不得大于6个")
+	}
+
 	length, ResPoint, ResEdge := util.DFS(&path)
 
 	// 成功
